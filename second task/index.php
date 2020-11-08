@@ -106,7 +106,7 @@ function math($arg1, $arg2, $operation) {
 			return $arg1 / $arg2;
 			break;
 		default:
-			echo "Заданы не верные аргументы.";
+			echo "Введены не верные аргументы.";
 			break;
 	}
 }
