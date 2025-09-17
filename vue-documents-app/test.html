@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Documents Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .content { display: flex; gap: 20px; }
+        .sidebar { flex: 1; max-width: 400px; }
+        .main { flex: 2; }
+        .search-box { margin-bottom: 20px; }
+        .search-input { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; }
+        .document-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px; cursor: pointer; }
+        .document-item:hover { background-color: #f5f5f5; }
+        .document-item.active { background-color: #e3f2fd; border-color: #2196f3; }
+        .document-title { margin: 0 0 10px 0; font-size: 18px; font-weight: bold; }
+        .document-content { color: #666; margin-bottom: 10px; }
+        .document-meta { font-size: 12px; color: #999; }
+        .preview { border: 1px solid #ddd; padding: 20px; border-radius: 4px; min-height: 400px; }
+        .preview-placeholder { text-align: center; color: #999; margin-top: 150px; }
+        .actions { margin-top: 20px; }
+        .btn { padding: 10px 20px; margin-right: 10px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-download { background-color: #4caf50; color: white; }
+        .btn-delete { background-color: #f44336; color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .has-image { color: #2196f3; }
+        @media (max-width: 768px) { .content { flex-direction: column; } .sidebar { max-width: none; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard</h1>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="Поиск документов..." id="searchInput">
+        </div>
+        
+        <div class="content">
+            <div class="sidebar">
+                <div id="documentsList">
+                    <!-- Документы будут загружены сюда -->
+                </div>
+            </div>
+            
+            <div class="main">
+                <div id="documentPreview" class="preview">
+                    <div class="preview-placeholder">Выберите документ для просмотра</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock данные
+        const mockDocuments = [
+            {
+                id: "1",
+                title: "Документ 1",
+                content: "Это первый тестовый документ с длинным содержимым для проверки отображения в интерфейсе. Здесь может быть любой текст, который пользователь хочет просмотреть.",
+                imageUrl: "https://picsum.photos/400/300?random=1",
+                createdAt: "2024-01-15T10:30:00Z",
+                updatedAt: "2024-01-15T10:30:00Z"
+            },
+            {
+                id: "2",
+                title: "Документ 2",
+                content: "Второй документ без изображения. Этот документ демонстрирует, как выглядит документ без прикрепленного изображения.",
+                createdAt: "2024-01-16T14:20:00Z",
+                updatedAt: "2024-01-16T14:20:00Z"
+            },
+            {
+                id: "3",
+                title: "Документ 3",
+                content: "Третий документ с изображением. Этот документ имеет прикрепленное изображение и может быть удален пользователем.",
+                imageUrl: "https://picsum.photos/400/300?random=3",
+                createdAt: "2024-01-17T09:15:00Z",
+                updatedAt: "2024-01-17T09:15:00Z"
+            }
+        ];
+
+        let selectedDocument = null;
+
+        // Функция поиска
+        function searchDocuments(query) {
+            const filteredDocs = mockDocuments.filter(doc => 
+                doc.title.toLowerCase().includes(query.toLowerCase()) ||
+                doc.content.toLowerCase().includes(query.toLowerCase())
+            );
+            renderDocuments(filteredDocs);
+        }
+
+        // Функция рендеринга документов
+        function renderDocuments(documents) {
+            const list = document.getElementById("documentsList");
+            list.innerHTML = "";
+            
+            if (documents.length === 0) {
+                list.innerHTML = "<p>Документы не найдены</p>";
+                return;
+            }
+            
+            documents.forEach(doc => {
+                const item = document.createElement("div");
+                item.className = "document-item";
+                item.onclick = () => selectDocument(doc);
+                
+                item.innerHTML = `
+                    <div class="document-title">${doc.title}</div>
+                    <div class="document-content">${doc.content.substring(0, 100)}...</div>
+                    <div class="document-meta">
+                        <span>${new Date(doc.createdAt).toLocaleDateString("ru-RU")}</span>
+                        ${doc.imageUrl ? "<span class=\"has-image\">📷</span>" : ""}
+                    </div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+
+        // Функция выбора документа
+        function selectDocument(doc) {
+            selectedDocument = doc;
+            
+            // Обновляем активный класс
+            document.querySelectorAll(".document-item").forEach(item => item.classList.remove("active"));
+            event.target.closest(".document-item").classList.add("active");
+            
+            renderPreview(doc);
+        }
+
+        // Функция рендеринга предпросмотра
+        function renderPreview(doc) {
+            const preview = document.getElementById("documentPreview");
+            
+            preview.innerHTML = `
+                <h2>${doc.title}</h2>
+                ${doc.imageUrl ? `<img src="${doc.imageUrl}" alt="${doc.title}" style="max-width: 100%; margin: 20px 0; border-radius: 8px;">` : ""}
+                <div class="document-content">${doc.content}</div>
+                <div class="document-meta">
+                    <p><strong>Создан:</strong> ${new Date(doc.createdAt).toLocaleDateString("ru-RU")}</p>
+                    <p><strong>Обновлен:</strong> ${new Date(doc.updatedAt).toLocaleDateString("ru-RU")}</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-download" onclick="downloadDocument()">📥 Скачать</button>
+                    <button class="btn btn-delete" onclick="deleteDocument()" ${!doc.imageUrl ? "disabled" : ""}>🗑️ Удалить</button>
+                </div>
+            `;
+        }
+
+        // Функция скачивания документа
+        function downloadDocument() {
+            if (selectedDocument) {
+                const blob = new Blob([selectedDocument.content], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `${selectedDocument.title}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Функция удаления документа
+        function deleteDocument() {
+            if (selectedDocument && selectedDocument.imageUrl) {
+                const index = mockDocuments.findIndex(doc => doc.id === selectedDocument.id);
+                if (index !== -1) {
+                    mockDocuments.splice(index, 1);
+                    selectedDocument = null;
+                    renderDocuments(mockDocuments);
+                    document.getElementById("documentPreview").innerHTML = '<div class="preview-placeholder">Выберите документ для просмотра</div>';
+                }
+            }
+        }
+
+        // Обработчик поиска
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            const query = e.target.value.trim();
+            if (query) {
+                searchDocuments(query);
+            } else {
+                renderDocuments(mockDocuments);
+            }
+        });
+
+        // Инициализация
+        renderDocuments(mockDocuments);
+    </script>
+</body>
+</html>

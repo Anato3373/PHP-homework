@@ -1,0 +1,25 @@
+{
+  "name": "vue-documents-app",
+  "version": "1.0.0",
+  "description": "Vue 3 Documents Dashboard with search and preview",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "pinia": "^2.1.6",
+    "vue-router": "^4.2.4",
+    "axios": "^1.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.3.4",
+    "typescript": "^5.1.6",
+    "vue-tsc": "^1.8.8",
+    "vite": "^4.4.9",
+    "@types/node": "^20.5.0",
+    "sass": "^1.66.1"
+  }
+}
